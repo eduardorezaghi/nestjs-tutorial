@@ -1,54 +1,73 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CoffeesController } from './coffees.controller';
+import { CoffeesService } from './coffees.service';
 
 describe('CoffeesController', () => {
   let controller: CoffeesController;
+  let service: CoffeesService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CoffeesController],
+      providers: [CoffeesService],
     }).compile();
 
     controller = module.get<CoffeesController>(CoffeesController);
+    service = module.get<CoffeesService>(CoffeesService);
   });
 
   describe('findOne', () => {
-    it('should return the coffee with the specified id', () => {
+    it('should call coffeesService.findOne() with the specified id', () => {
       const id = '1';
-      const result = controller.findOne(id);
-      expect(result).toBe(`This action returns #${id} coffee`);
+      const findOneSpy = jest.spyOn(service, 'findOne');
+
+      controller.findOne(id);
+
+      expect(findOneSpy).toHaveBeenCalledWith(id);
     });
   });
 
   describe('findAll', () => {
-    it('should return all coffees', () => {
-      const result = controller.findAll();
-      expect(result).toBe('This action returns all coffees');
+    it('should call coffeesService.findAll()', () => {
+      const findAllSpy = jest.spyOn(service, 'findAll');
+
+      controller.findAll({});
+
+      expect(findAllSpy).toHaveBeenCalled();
     });
   });
 
   describe('create', () => {
-    it('should create a new coffee', () => {
+    it('should call coffeesService.create() with the provided body', () => {
       const body = { name: 'Test Coffee' };
-      const result = controller.create(body);
-      expect(result).toEqual(body);
+      const createSpy = jest.spyOn(service, 'create');
+
+      controller.create(body);
+
+      expect(createSpy).toHaveBeenCalledWith(body);
     });
   });
 
   describe('update', () => {
-    it('should update the coffee with the specified id', () => {
+    it('should call coffeesService.update() with the specified id and body', () => {
       const id = '1';
       const body = { name: 'Updated Coffee' };
-      const result = controller.update(id, body);
-      expect(result).toBe(`This action updates #${id} coffee`);
+      const updateSpy = jest.spyOn(service, 'update');
+
+      controller.update(id, body);
+
+      expect(updateSpy).toHaveBeenCalledWith(id, body);
     });
   });
 
   describe('remove', () => {
-    it('should remove the coffee with the specified id', () => {
+    it('should call coffeesService.remove() with the specified id', () => {
       const id = '1';
-      const result = controller.remove(id);
-      expect(result).toBe(`This action removes #${id} coffee`);
+      const removeSpy = jest.spyOn(service, 'remove');
+
+      controller.remove(id);
+
+      expect(removeSpy).toHaveBeenCalledWith(id);
     });
   });
 });
