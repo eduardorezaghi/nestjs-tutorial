@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Coffee } from './entities/coffee.entity';
 import type { ICoffeesService } from './coffees.service.d';
 
@@ -18,7 +18,12 @@ class CoffeesService implements ICoffeesService {
   }
 
   public findOne(id: string) {
-    return this.coffees.find(item => item.id === +id);
+    const coffee =  this.coffees.find(item => item.id === +id);
+    if (!coffee) {
+      throw new NotFoundException(`Coffee #${id} not found`);
+    }
+    
+    return coffee;
   }
 
   public create(createCoffeeDto: any) {
