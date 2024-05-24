@@ -2,6 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Coffee } from './entities/coffee.entity';
 import type { ICoffeesService } from './coffees.service.d';
 
+// This decorator defines that the class is a provider.
+// That means, in the dependency injection system, it can inject dependencies.
+// Providers are a fundamental concept in Nest.
 @Injectable()
 class CoffeesService implements ICoffeesService {
   private coffees: Coffee[] = [
