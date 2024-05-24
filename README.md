@@ -43,6 +43,7 @@ curlie -v PATCH http://localhost:3000/coffees/1 Content-Type:application/json na
 
 # Delete a coffee
 curl -X DELETE http://localhost:3000/coffees/1
+curlie -v DELETE http://localhost:3000/coffees/1
 ```
 
 ## Resources
