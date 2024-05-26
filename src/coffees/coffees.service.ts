@@ -21,13 +21,18 @@ class CoffeesService implements ICoffeesService {
   ) {}
 
   public async findAll() {
-    return await this.coffeeRepository.find();
+    return await this.coffeeRepository.find({
+      relations: ['flavors']
+    });
   }
 
-  public async findOne(id: string) {
-    const coffee = await this.coffeeRepository.findOneBy({
-      id: +id
-    })
+  public async findOne(id: number) {
+    const coffee = await this.coffeeRepository.findOne({
+      where: { id },
+      // Eagerly load the flavors relation.
+      // "join" the flavors relation to the coffee entity.
+      relations: ['flavors']
+    });
     if (!coffee) {
       throw new NotFoundException(`Coffee #${id} not found`);
     }
@@ -53,7 +58,7 @@ class CoffeesService implements ICoffeesService {
   }
 
   public async remove(id: string) {
-    const coffee = await this.findOne(id);
+    const coffee = await this.findOne(+id);
     return await this.coffeeRepository.remove(coffee);
   }
 }

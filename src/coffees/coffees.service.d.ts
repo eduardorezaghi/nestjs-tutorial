@@ -16,7 +16,7 @@ export class ICoffeesService {
    * @param id - The ID of the coffee.
    * @returns The Coffee object with the specified ID, or undefined if not found.
    */
-  public async findOne(id: string): Promise<Coffee> | undefined;
+  public async findOne(id: number): Promise<Coffee> | undefined;
 
   /**
    * Creates a new coffee.
