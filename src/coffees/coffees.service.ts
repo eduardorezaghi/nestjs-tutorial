@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateCoffeeDto } from './dto/create-coffee.dto';
 import { UpdateCoffeeDto } from './dto/update-coffee.dto';
+import Flavor from './entities/flavor.entity';
 
 // This decorator defines that the class is a provider.
 // That means, in the dependency injection system, it can inject dependencies.
@@ -18,7 +19,19 @@ class CoffeesService implements ICoffeesService {
   constructor(
     @InjectRepository(Coffee)
     private readonly coffeeRepository: Repository<Coffee>,
+    @InjectRepository(Flavor)
+    private readonly flavorRepository: Repository<Flavor>,
   ) {}
+
+  private async preloadFlavorByName(name: string): Promise<Flavor> {
+    const existingFlavor = await this.flavorRepository.findOne({
+      where: { name }
+    });
+
+    if (existingFlavor) return existingFlavor
+    
+    return this.flavorRepository.create({ name });
+  }
 
   public async findAll() {
     return await this.coffeeRepository.find({
@@ -41,20 +54,35 @@ class CoffeesService implements ICoffeesService {
   }
 
   public async create(createCoffeeDto: CreateCoffeeDto) {
-    this.coffeeRepository.create(createCoffeeDto);
-    return await this.coffeeRepository.save(createCoffeeDto);
+    const flavors = await Promise.all(
+      createCoffeeDto.flavors.map(name => this.preloadFlavorByName(name))
+    );
+
+    const coffee = this.coffeeRepository.create({
+      ...createCoffeeDto,
+      flavors,
+    });
+    return await this.coffeeRepository.save(coffee);
   }
 
   public async update(id: string, updateCoffeeDto: UpdateCoffeeDto) {
-    const existingCoffee = await this.coffeeRepository.preload({
+    const flavors =
+      updateCoffeeDto.flavors &&
+      (await Promise.all(
+        updateCoffeeDto.flavors.map(name => this.preloadFlavorByName(name))
+      ));
+
+    const coffee = await this.coffeeRepository.preload({
       id: +id,
       ...updateCoffeeDto,
-    })
-    if (!existingCoffee) {
+      flavors,
+    });
+
+    if (!coffee) {
       throw new NotFoundException(`Coffee #${id} not found`);
     }
 
-    return await this.coffeeRepository.save(existingCoffee);
+    return await this.coffeeRepository.save(coffee);
   }
 
   public async remove(id: string) {
